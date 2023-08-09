@@ -102,8 +102,9 @@
             labelVersion.Name="labelVersion";
             labelVersion.Size=new Size(316, 20);
             labelVersion.TabIndex=0;
-            labelVersion.Text="v0.0.2";
+            labelVersion.Text="v0.0.3";
             labelVersion.TextAlign=ContentAlignment.MiddleLeft;
+            labelVersion.Click+=labelVersion_Click;
             // 
             // labelCopyright
             // 
@@ -141,7 +142,7 @@
             textBoxDescription.Size=new Size(316, 147);
             textBoxDescription.TabIndex=23;
             textBoxDescription.TabStop=false;
-            textBoxDescription.Text="GalaxyNet Client Prototype v0.0.2";
+            textBoxDescription.Text="GalaxyNet Client Prototype v0.0.3";
             // 
             // okButton
             // 
