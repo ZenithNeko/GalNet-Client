@@ -19,7 +19,7 @@ namespace galnet_prototype
             OFFLINE = 0x04
         }
 
-        ClientWebSocket ws = new ClientWebSocket();
+        ClientWebSocket ws;
         public static RawSourceWaveStream galnetA = new RawSourceWaveStream(Properties.Resources.GalNet_LOOPA, new WaveFormat(44100, 2));
         public static RawSourceWaveStream galnetB = new RawSourceWaveStream(Properties.Resources.GalNet_LOOPB, new WaveFormat(44100, 2));
         public static RawSourceWaveStream galnetC = new RawSourceWaveStream(Properties.Resources.GalNet_LOOPC, new WaveFormat(44100, 2));
@@ -27,6 +27,8 @@ namespace galnet_prototype
         private WaveOutEvent galnetBDevice;
         private WaveOutEvent galnetCDevice;
         public bool isResizing = false;
+
+        public bool connected = false;
 
         Process proc = Process.GetCurrentProcess();
         public Form1()
@@ -93,38 +95,27 @@ namespace galnet_prototype
 
         async void Connect(string uri)
         {
+            ws = new ClientWebSocket();
             // connect to websocket (no auth yet)
-            await ws.ConnectAsync(new Uri(uri), CancellationToken.None);
+            try
+            {
+                await ws.ConnectAsync(new Uri(uri), CancellationToken.None);
+            } catch (Exception e)
+            {
+                toolStripStatusLabel2.Text = "Server status: Disconnected";
+                MessageBox.Show(e.Message, "Failed to connect", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+
             byte[] buf = new byte[1056];
 
-            // send inital user connection packet
-            /* 0x22 - start byte
-             * inital status byte (0x01-0x04)
-             * 
-             * 
-             *
-             */
-            /*switch (statusBox.Text)
-            {
-                case "Available":
-                    await ws.SendAsync({ 0x22, StatusByte.AVAILABLE}, WebSocketMessageType.Text, true, CancellationToken.None);
-                    break;
-                case "Away":
-                    await ws.SendAsync({ 0x22, StatusByte.AWAY}, WebSocketMessageType.Text, true, CancellationToken.None);
-                    break;
-                case "Busy":
-                    await ws.SendAsync({ 0x22, StatusByte.BUSY}, WebSocketMessageType.Text, true, CancellationToken.None);
-                    break;
-                case "Invisible":
-                    await ws.SendAsync({ 0x22, StatusByte.OFFLINE}, WebSocketMessageType.Text, true, CancellationToken.None);
-                    break;
-            }*/
-
-
-            while (ws.State == WebSocketState.Open)
+            if (ws.State == WebSocketState.Open)
             {
                 toolStripStatusLabel2.Text = "Server status: Connected";
                 taskbarIcon.Text = "GalaxyNet Client - Connected";
+                connected = true;
+            }
+            while (ws.State == WebSocketState.Open)
+            {
                 // recieve websocket message
                 var result = await ws.ReceiveAsync(buf, CancellationToken.None);
 
@@ -133,7 +124,38 @@ namespace galnet_prototype
                     if (ws.State != WebSocketState.Closed) await ws.CloseAsync(WebSocketCloseStatus.NormalClosure, null, CancellationToken.None);
                     toolStripStatusLabel2.Text = "Server status: Disconnected";
                     taskbarIcon.Text = "GalaxyNet Client - Disconnected";
+                    connected = false;
                 }
+            }
+        }
+        async void SignIn()
+        {
+            if (connected)
+            {
+                //
+                // send inital user connection packet
+                /* 0x22 - start byte
+                 * inital status byte (0x01-0x04)
+                 * username length - 1 byte
+                 * username - x bytes
+                 * password length - 1 byte
+                 * password - x bytes
+                 */
+                /*switch (statusBox.Text)
+                {
+                    case "Available":
+                        await ws.SendAsync({ 0x22, StatusByte.AVAILABLE}, WebSocketMessageType.Text, true, CancellationToken.None);
+                        break;
+                    case "Away":
+                        await ws.SendAsync({ 0x22, StatusByte.AWAY}, WebSocketMessageType.Text, true, CancellationToken.None);
+                        break;
+                    case "Busy":
+                        await ws.SendAsync({ 0x22, StatusByte.BUSY}, WebSocketMessageType.Text, true, CancellationToken.None);
+                        break;
+                    case "Invisible":
+                        await ws.SendAsync({ 0x22, StatusByte.OFFLINE}, WebSocketMessageType.Text, true, CancellationToken.None);
+                        break;
+                }*/
             }
         }
 
