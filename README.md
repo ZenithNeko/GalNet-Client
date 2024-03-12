@@ -1,1 +1,0 @@
-# galnet prototype
