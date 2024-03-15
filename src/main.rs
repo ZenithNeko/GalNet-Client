@@ -8,9 +8,7 @@ use tokio_tungstenite::{connect_async, tungstenite::Message, WebSocketStream};
 // handle_incoming_messages takes in the read input and will run infinitly till a break is introduced.
 // even if an error is introduced in the function, it wont cause the program to panic and shit itself
 // all this does is print any message that come in.
-// This leads to unintended things like trying to display the closing connection.
 
-//TODO: add message types like pings, close and opens
 async fn handle_incoming_messages(mut read: SplitStream<WebSocketStream<impl AsyncRead + AsyncWrite + Unpin>>) {
     while let Some(message) = read.next().await {
         let message = message.expect("Failed to read :<");
