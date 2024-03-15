@@ -13,9 +13,27 @@ use tokio_tungstenite::{connect_async, tungstenite::Message, WebSocketStream};
 //TODO: add message types like pings, close and opens
 async fn handle_incoming_messages(mut read: SplitStream<WebSocketStream<impl AsyncRead + AsyncWrite + Unpin>>) {
     while let Some(message) = read.next().await {
+        let message = message.expect("Failed to read :<");
         match message {
-            Ok(msg) => println!("Received a message: {}", msg),
-            Err(e) => eprintln!("Error receiving message: {}", e),
+            Message::Close(_) => {
+                println!("Connnection has been closed")
+            }
+            Message::Text(_) => {
+                println!("Received Message: {}", message)
+            }
+            Message::Binary(_) => {
+                println!("Received Binary: {}", message)
+            }
+            Message::Ping(_) => {
+                println!("Received ping???: {}", message);
+            }
+            Message::Pong(_) => {
+                println!("Received pong: {}", message);
+            }
+            // I still don't know what frames are, so this may be thrown out unless i find something
+            Message::Frame(_) => {
+                println!("Received frame: {}", message)
+            }
         }
     }
 }
