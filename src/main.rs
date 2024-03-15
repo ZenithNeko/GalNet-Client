@@ -40,14 +40,14 @@ async fn handle_incoming_messages(mut read: SplitStream<WebSocketStream<impl Asy
 async fn heartbeat(mut write: SplitSink<WebSocketStream<impl AsyncRead + AsyncWrite + Unpin>, Message>){
     let mut number = Some(0);
     while let Some(i) = number {
-        if i >= 5 {
+        if i >= 12 {
             println!("Heartbreat success!");
             write.close().await.expect("Cant close connection");
             break;
         }
         else {
-            write.send(Message::Ping("Ping!".into())).await.expect("Couldnt sent message :(");
-            sleep(Duration::from_secs(1));
+            write.send(Message::Ping("Ping!".into())).await.expect("Couldnt sent ping :(");
+            sleep(Duration::from_secs(30));
             number = Some(i + 1)
         }
     }
